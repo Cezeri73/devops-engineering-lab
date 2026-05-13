@@ -1,0 +1,54 @@
+pipeline {
+    environment {
+        FLASK_PORT = "5000"
+        REDIS_HOST = "redis"
+        REDIS_PORT = "6379"
+    }
+    agent any
+
+    stages {
+        stage('1. Kodu İndir (Checkout)') {
+            steps {
+                // KULLANICI_ADIN kısmını kendi GitHub adınla değiştirmeyi unutma!
+                git branch: 'main', url: 'https://github.com/Cezeri73/devops-engineering-lab.git'
+            }
+        }
+        
+        stage('2. Test (Kalite Kontrol)') {
+            steps {
+                dir('03-jenkins-cicd') {
+                    // Gerçek dünyada burada 'pytest test_app.py' gibi komutlar çalışır.
+                    // Biz mantığı görmek için bir test simülasyonu yapıyoruz.
+                    sh 'echo "Birim Testleri (Unit Tests) başlatılıyor..."'
+                    sh 'sleep 2' // Test ediliyormuş gibi 2 saniye bekle
+                    sh 'echo "Veritabanı bağlantı testleri yapılıyor..."'
+                    sh 'sleep 2'
+                    sh 'echo "Tüm testler başarıyla geçildi! ✅"'
+                }
+            }
+        }
+
+        stage('3. Build (Sürekli Entegrasyon - CI)') {
+            steps {
+                dir('03-jenkins-cicd') {
+                    sh 'echo "Docker imajı derleniyor..."'
+                    sh 'docker build -t my-secure-flask:v3 .'
+                }
+            }
+        }
+
+       stage('4. Deploy (Sürekli Dağıtım - CD)') {
+            steps {
+                dir('03-jenkins-cicd') {
+                    sh 'echo "Eski konteynerler temizleniyor..."'
+                    // Burada 'docker-compose down' yerine daha garanti bir temizlik yapalım
+                    sh 'docker-compose down --remove-orphans || true'
+                    
+                    sh 'echo "Yeni versiyon ayağa kaldırılıyor..."'
+                    // Portları zorla içeri basalım
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+    }
+}

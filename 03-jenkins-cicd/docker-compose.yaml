@@ -1,0 +1,18 @@
+services:
+  web:
+    image: my-secure-flask:v3 # Build ettiğimiz imajı kullan
+    ports:
+      - "9090:${FLASK_PORT}"
+    depends_on:
+      - redis
+    # env_file kısmını sildik, çünkü değerleri Jenkins verecek
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:

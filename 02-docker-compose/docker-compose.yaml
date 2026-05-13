@@ -1,0 +1,21 @@
+services:
+  web:
+    build: .
+    ports:
+      # Mac'teki 9090 portunu .env'deki FLASK_PORT'a bağlıyoruz
+      - "9090:${FLASK_PORT}" 
+    # YENİ EKLENEN KISIM: Konteynerin içine .env dosyasını enjekte et
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}" # Portları da dinamik yaptık
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
